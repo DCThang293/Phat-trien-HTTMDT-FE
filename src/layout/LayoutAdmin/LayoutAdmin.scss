@@ -1,0 +1,85 @@
+.layout-admin {
+  /* Tăng kích thước font chữ và màu chữ */
+  .header__dashboard,
+  .ant-layout-header,
+  .ant-layout-footer {
+    color: white;
+    font-size: 20px;
+  }
+
+  /* Toàn bộ chữ trong Sider và các mục Menu */
+  .ant-menu-dark,
+  .ant-menu-dark .ant-menu-item {
+    color: white;
+    font-size: 18px; /* Tăng kích thước font chữ trong Menu */
+  }
+
+  /* Căn chỉnh các mục trong Menu */
+  .ant-menu-item {
+    display: flex;
+    align-items: center;
+  }
+
+  /* Icon trong Menu */
+  .ant-menu-item .anticon {
+    font-size: 20px; /* Tăng kích thước icon */
+  }
+
+  /* Footer */
+  .ant-layout-footer {
+    font-size: 16px; /* Kích thước font chữ Footer */
+  }
+
+  /* Content - Điều chỉnh căn giữa chữ và thêm padding nếu cần */
+  .ant-layout-content {
+    font-size: 18px;
+    display: flex;
+    // align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .header__dashboard {
+    font-size: 32px;
+    text-align: left;
+    font-weight: bold;
+  }
+
+  .ant-layout-sider-children{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .sider__logout {
+    margin: 4px;
+    padding-left: 24px;
+    padding-right: 16px;
+    padding-bottom: 20px;
+    &:hover {
+        cursor: pointer;
+    }
+  }
+
+  .sider {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    height: 91vh;
+    z-index: 1000; /* Đảm bảo rằng sider luôn hiển thị phía trên các phần tử khác */
+    width: 200px; /* Hoặc chiều rộng bạn muốn cho sider */
+  }
+  
+  .content {
+    margin-left: 200px; /* Đảm bảo nội dung không bị che khuất bởi sider */
+    padding: 20px; /* Căn chỉnh nội dung */
+    margin-top: 64px;
+  }
+
+  .header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 2000;
+  }
+}

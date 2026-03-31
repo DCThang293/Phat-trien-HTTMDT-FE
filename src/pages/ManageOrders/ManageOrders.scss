@@ -1,0 +1,29 @@
+.filter{
+    background-color: #08203d;
+    color: #fff;
+      &:hover {
+           background-color: #fff !important;
+          color: #001529 !important;
+          border: 1px solid #001529;
+        }
+  }
+  .action-button{
+    background-color: #08203d;
+    color: #fff;
+      &:hover {
+           background-color: #fff !important;
+          color: #001529 !important;
+          border: 1px solid #001529;
+          animation: scale-down-center 0.3s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+
+        }
+  }
+  .color-col{
+    background-color: #08203d;
+  }
+  .customer-table .ant-table-thead > tr > th {
+    background-color: #08203d;
+    color: white;
+    text-align: center;
+  }
+  

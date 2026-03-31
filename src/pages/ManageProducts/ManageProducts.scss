@@ -1,0 +1,25 @@
+.add-find-product{
+  background-color: #08203d;
+  color: #fff;
+    &:hover {
+        background-color: #fff !important;
+        color: #001529 !important;
+        border: 1px solid #001529;
+        animation: scale-down-center 0.3s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+      }
+}
+.area-focus{
+  &:focus{
+    animation: scale-up-center-1 0.5s cubic-bezier(0.390, 0.575, 0.565, 1.000) both;
+  }
+  &:hover{
+    border: #08203d solid 1px;
+  }
+}
+
+.description-cell {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
