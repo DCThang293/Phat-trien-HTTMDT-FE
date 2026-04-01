@@ -15,8 +15,9 @@ import ManageOrders from "../pages/ManageOrders";
 import PrivateCustomer from "../pages/PrivateCustomer";
 import LoginAdmin from "../pages/LoginAdmin";
 import PrivateAdmin from "../pages/PrivateAdmin";
-import ForgotPassword from "../pages/Login/ForgotPassword"; // Cập nhật đường dẫn
-import ResetPassword from "../pages/Login/ResetPassword"; // Cập nhật đường dẫn
+import ForgotPassword from "../pages/Login/ForgotPassword";
+import ResetPassword from "../pages/Login/ResetPassword";
+import PaymentReturn from "../pages/PaymentReturn";
 
 const routes = [
   {
@@ -50,6 +51,10 @@ const routes = [
       {
         path: "/reset-password",
         element: <ResetPassword />,
+      },
+      {
+        path: "/payment/vnpay/return",
+        element: <PaymentReturn />,
       },
       {
         element: <PrivateCustomer />,

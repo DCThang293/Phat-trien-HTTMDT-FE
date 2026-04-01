@@ -339,31 +339,57 @@ const ProductTable = () => {
       selectedRowKeys.includes(product.cartItemId)
     );
 
-    const orderItemRequests = selected.map(item => {
-      return {
-        productId: item.productId,
-        size: item.productSize,
-        quantity: item.productQuantity
-      }
-    });
+    const orderItemRequests = selected.map(item => ({
+      productId: item.productId,
+      size: item.productSize,
+      quantity: item.productQuantity
+    }));
 
     const orderProducts = {
       ...values,
       orderItemRequests,
       userId: id
-    }
+    };
 
     const response = await fetch(`/order/user/insert`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(orderProducts)
-    })
+    });
     const data = await response.json();
+
     if (data.success) {
-      for (const item of selected) {
-        await deleteProductsInCart(item.cartItemId);
+      if (values.paymentMethod === 'VNPAY') {
+        const totalAmount = selected.reduce(
+          (sum, item) => sum + item.productPrice * item.productQuantity, 0
+        ) + shippingFee;
+
+        try {
+          const vnpayRes = await fetch(
+            `/payment/vnpay/create?amount=${totalAmount}&orderInfo=Thanh+toan+don+hang+Snaker`,
+            { method: 'POST' }
+          );
+          const vnpayData = await vnpayRes.json();
+          if (vnpayData.success && vnpayData.data) {
+            // Xóa giỏ hàng rồi mới redirect
+            for (const item of selected) {
+              await deleteProductsInCart(item.cartItemId);
+            }
+            window.location.href = vnpayData.data;
+            return data;
+          } else {
+            openNotification("Thất bại", "Không thể tạo URL thanh toán VNPay", "error");
+            return { success: false };
+          }
+        } catch (err) {
+          openNotification("Thất bại", "Lỗi kết nối VNPay: " + err.message, "error");
+          return { success: false };
+        }
+      } else {
+        // COD: xóa giỏ hàng bình thường
+        for (const item of selected) {
+          await deleteProductsInCart(item.cartItemId);
+        }
       }
     }
 
@@ -543,6 +569,17 @@ const ProductTable = () => {
                     placeholder="Nhập ghi chú"
                     style={{ width: "100%", height: 50 }}
                   />
+                </Form.Item>
+                <Form.Item
+                  name="paymentMethod"
+                  label="Phương thức thanh toán"
+                  initialValue="COD"
+                  rules={[{ required: true, message: "Vui lòng chọn phương thức thanh toán!" }]}
+                >
+                  <Select>
+                    <Option value="COD">Thanh toán khi nhận hàng (COD)</Option>
+                    <Option value="VNPAY">Thanh toán qua VNPay</Option>
+                  </Select>
                 </Form.Item>
               </Card>
             </Col>
