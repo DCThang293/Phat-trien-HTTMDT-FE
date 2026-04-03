@@ -1,11 +1,12 @@
 import { Button, Carousel, Col, Form, Image, Input, Modal, notification, Row, Select, Space, Spin, Tag } from "antd";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import './Home.scss';
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import image1 from '../../images/image1.jpg';
 import image2 from '../../images/image2.jpg';
 import { SearchOutlined } from '@ant-design/icons';
+import QuickOrderModal from '../../components/QuickOrderModal';
 
 function Home() {
   const [api, contextHolder] = notification.useNotification();
@@ -28,6 +29,13 @@ function Home() {
   const [user, setUser] = useState({});
   const [carts, setCarts] = useState([]);
   const [loading, setLoading] = useState(false); // Trạng thái loading
+  const [searchValue, setSearchValue] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchRef = useRef(null);
+  const [form] = Form.useForm();
+  const [isQuickOrderOpen, setIsQuickOrderOpen] = useState(false);
+  const [quickOrderProduct, setQuickOrderProduct] = useState(null);
 
   const isLogin = useSelector(state => state.loginReducer);
   const token = sessionStorage.getItem('token');
@@ -176,6 +184,7 @@ function Home() {
 
   const handleSearch = async (values) => {
     const searchName = values.name || '';
+    setShowSuggestions(false);
     if (searchName.trim() === '') {
       setFilteredProducts(products);
     } else {
@@ -184,6 +193,56 @@ function Home() {
       );
       setFilteredProducts(newProducts);
     }
+  };
+
+  const handleSearchInput = (e) => {
+    const value = e.target.value;
+    setSearchValue(value);
+    if (value.trim() === '') {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    } else {
+      const matched = products
+        .filter(item => item.name.toLowerCase().includes(value.toLowerCase()))
+        .slice(0, 6);
+      setSuggestions(matched);
+      setShowSuggestions(true);
+    }
+  };
+
+  const handleSelectSuggestion = (name) => {
+    setSearchValue(name);
+    form.setFieldsValue({ name });
+    setShowSuggestions(false);
+    const newProducts = products.filter(item =>
+      item.name.toLowerCase().includes(name.toLowerCase())
+    );
+    setFilteredProducts(newProducts);
+  };
+
+  // Đóng gợi ý khi click ra ngoài
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleBuyNow = async () => {
+    if (!(isLogin || token)) {
+      navigate('/login');
+      return;
+    }
+    const productIsChoose = {
+      ...productDetail,
+      size: productDetail.size[indexSize].size
+    };
+    setQuickOrderProduct(productIsChoose);
+    setIsModalOpen(false);
+    setIsQuickOrderOpen(true);
   };
 
   const contentStyle = {
@@ -210,10 +269,43 @@ function Home() {
             <h2 className="home__title animate__animated animate__fadeInDown">Sản phẩm</h2>
             <p className="home__subtitle"></p>
             <div className="home__forms">
-              <Form onFinish={handleSearch} className="search-form">
-                <Form.Item name='name'>
-                  <Input className="area-focus" placeholder="Tên sản phẩm" prefix={<SearchOutlined />} />
-                </Form.Item>
+              <Form onFinish={handleSearch} className="search-form" form={form}>
+                <div ref={searchRef} style={{ position: 'relative' }}>
+                  <Form.Item name='name'>
+                    <Input
+                      className="area-focus"
+                      placeholder="Tên sản phẩm"
+                      prefix={<SearchOutlined />}
+                      value={searchValue}
+                      onChange={handleSearchInput}
+                      autoComplete="off"
+                    />
+                  </Form.Item>
+                  {showSuggestions && suggestions.length > 0 && (
+                    <div style={{
+                      position: 'absolute', top: '100%', left: 0, right: 0,
+                      background: '#fff', border: '1px solid #d9d9d9',
+                      borderRadius: 6, zIndex: 1000, boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                    }}>
+                      {suggestions.map(item => (
+                        <div
+                          key={item.id}
+                          onMouseDown={() => handleSelectSuggestion(item.name)}
+                          style={{
+                            padding: '8px 12px', cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', gap: 10,
+                            borderBottom: '1px solid #f0f0f0'
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.background = '#f5f5f5'}
+                          onMouseLeave={e => e.currentTarget.style.background = '#fff'}
+                        >
+                          <img src={item.image} alt={item.name} style={{ width: 36, height: 36, objectFit: 'cover', borderRadius: 4 }} />
+                          <span>{item.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <Form.Item>
                   <Button type="primary" htmlType="submit" className="search-button">Tìm kiếm</Button>
                 </Form.Item>
@@ -288,12 +380,20 @@ function Home() {
               </p>
               <p className="product__detail-price">Giá: {productDetail?.price} VNĐ</p>
             </Col>
-            <Col xl={24} style={{ textAlign: "center" }}>
-              <Button onClick={handleAddToCart} disabled={stocks === 0 ? true : false}>Thêm vào giỏ hàng</Button>
+            <Col xl={24} style={{ textAlign: "center", display: 'flex', gap: 12, justifyContent: 'center' }}>
+              <Button onClick={handleAddToCart} disabled={stocks === 0} size="large">Thêm vào giỏ hàng</Button>
+              <Button onClick={handleBuyNow} disabled={stocks === 0} size="large" type="primary" style={{ background: '#ff4d4f', borderColor: '#ff4d4f' }}>Mua ngay</Button>
             </Col>
           </Row>
         </Modal>
-        
+        <QuickOrderModal
+          open={isQuickOrderOpen}
+          onClose={() => setIsQuickOrderOpen(false)}
+          product={quickOrderProduct}
+          user={user}
+          onSuccess={(msg) => openNotification('Thành công', msg, 'success')}
+          onError={(msg) => openNotification('Thất bại', msg, 'error')}
+        />
       </div>
     </>
   );

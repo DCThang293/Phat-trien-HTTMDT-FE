@@ -80,17 +80,33 @@ function Register() {
       <div className="register">
         <h2 class="animate__animated animate__bounce">Register Account</h2>
         <Form onFinish={handleSubmit}>
-          <Form.Item name='fullName' rules={[{ required: true, message: 'Please input your username!' }]}>
-            <Input className= "button-focus" placeholder="Full Name" />
+          <Form.Item name='fullName' rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }]}>
+            <Input className="button-focus" placeholder="Full Name" />
           </Form.Item>
-          <Form.Item name='email' rules={[{ required: true, message: 'Please input your email!' }]}>
-            <Input className= "button-focus" placeholder="Email" type="email" />
+          <Form.Item name='email' rules={[
+            { required: true, message: 'Vui lòng nhập email!' },
+            { type: 'email', message: 'Email không hợp lệ!' }
+          ]}>
+            <Input className="button-focus" placeholder="Email" />
           </Form.Item>
-          <Form.Item name='password' rules={[{ required: true, message: 'Please input your password!' }]}>
-            <Input.Password className= "button-focus" placeholder="Password" />
+          <Form.Item name='phone' rules={[
+            { required: true, message: 'Vui lòng nhập số điện thoại!' },
+            { pattern: /^(0[3|5|7|8|9])+([0-9]{8})$/, message: '⚠ Số điện thoại không hợp lệ! Phải là 10 chữ số bắt đầu bằng 03, 05, 07, 08, 09' }
+          ]}>
+            <Input className="button-focus" placeholder="Số điện thoại" maxLength={10} />
+          </Form.Item>
+          <Form.Item name='password' rules={[
+            { required: true, message: 'Vui lòng nhập mật khẩu!' },
+            { min: 8, message: '⚠ Mật khẩu phải có ít nhất 8 ký tự!' },
+            {
+              pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+              message: '⚠ Mật khẩu phải có chữ hoa, chữ thường, số và ký tự đặc biệt (@$!%*?&)!'
+            }
+          ]}>
+            <Input.Password className="button-focus" placeholder="Mật khẩu (VD: Abc@1234)" />
           </Form.Item>
           <Form.Item>
-            <Button htmlType="submit" type="primary" className = "register-button">Register</Button>
+            <Button htmlType="submit" type="primary" className="register-button">Register</Button>
           </Form.Item>
         </Form>
       </div>

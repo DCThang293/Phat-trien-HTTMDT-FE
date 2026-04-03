@@ -70,13 +70,19 @@ function Login() {
         <Form onFinish={handleSubmit}>
           <Form.Item
             name="email"
-            rules={[{ required: true, message: "Vui lòng nhập email!" }]}
+            rules={[
+              { required: true, message: 'Vui lòng nhập email!' },
+              { type: 'email', message: '⚠ Email không đúng định dạng!' }
+            ]}
           >
             <Input placeholder="Email" />
           </Form.Item>
           <Form.Item
             name="password"
-            rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
+            rules={[
+              { required: true, message: 'Vui lòng nhập mật khẩu!' },
+              { min: 8, message: '⚠ Mật khẩu phải có ít nhất 8 ký tự!' }
+            ]}
           >
             <Input.Password placeholder="Mật khẩu" />
           </Form.Item>
