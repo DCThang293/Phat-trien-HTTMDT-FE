@@ -359,32 +359,40 @@ const ProductTable = () => {
     const data = await response.json();
 
     if (data.success) {
-      if (values.paymentMethod === 'VNPAY') {
+      if (values.paymentMethod === 'BANK') {
         const totalAmount = selected.reduce(
           (sum, item) => sum + item.productPrice * item.productQuantity, 0
         ) + shippingFee;
 
-        try {
-          const vnpayRes = await fetch(
-            `/payment/vnpay/create?amount=${totalAmount}&orderInfo=Thanh+toan+don+hang+Snaker`,
-            { method: 'POST' }
-          );
-          const vnpayData = await vnpayRes.json();
-          if (vnpayData.success && vnpayData.data) {
-            // Xóa giỏ hàng rồi mới redirect
-            for (const item of selected) {
-              await deleteProductsInCart(item.cartItemId);
-            }
-            window.location.href = vnpayData.data;
-            return data;
-          } else {
-            openNotification("Thất bại", "Không thể tạo URL thanh toán VNPay", "error");
-            return { success: false };
-          }
-        } catch (err) {
-          openNotification("Thất bại", "Lỗi kết nối VNPay: " + err.message, "error");
-          return { success: false };
+        // Xóa giỏ hàng
+        for (const item of selected) {
+          await deleteProductsInCart(item.cartItemId);
         }
+
+        // Lấy thông tin ngân hàng và hiển thị
+        const bankRes = await fetch(`/payment/bank-info?orderId=${data.data?.id || Date.now()}&amount=${totalAmount}`);
+        const bankData = await bankRes.json();
+        if (bankData.success) {
+          const info = bankData.data;
+          Modal.info({
+            title: 'Thông tin chuyển khoản',
+            width: 500,
+            content: (
+              <div>
+                <p><strong>Ngân hàng:</strong> {info.bankName}</p>
+                <p><strong>Số tài khoản:</strong> {info.accountNumber}</p>
+                <p><strong>Chủ tài khoản:</strong> {info.accountName}</p>
+                <p><strong>Số tiền:</strong> {info.amount?.toLocaleString()} đ</p>
+                <p><strong>Nội dung CK:</strong> {info.content}</p>
+                <div style={{textAlign:'center', marginTop: 16}}>
+                  <img src={info.qrCode} alt="QR Code" style={{width: 200}} />
+                  <p style={{fontSize: 12, color: '#888'}}>Quét mã QR để chuyển khoản</p>
+                </div>
+              </div>
+            ),
+          });
+        }
+        return data;
       } else {
         // COD: xóa giỏ hàng bình thường
         for (const item of selected) {
@@ -578,7 +586,7 @@ const ProductTable = () => {
                 >
                   <Select>
                     <Option value="COD">Thanh toán khi nhận hàng (COD)</Option>
-                    <Option value="VNPAY">Thanh toán qua VNPay</Option>
+                    <Option value="BANK">Chuyển khoản ngân hàng</Option>
                   </Select>
                 </Form.Item>
               </Card>

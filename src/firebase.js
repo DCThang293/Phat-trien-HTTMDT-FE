@@ -1,20 +1,18 @@
-// src/config/firebase.js
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, FacebookAuthProvider } from "firebase/auth";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
+  apiKey: "AIzaSyBUfRr-dTZ5sy5Jfub20TS8WDlLdXvdDgw",
+  authDomain: "shoe-shop-1fc86.firebaseapp.com",
+  projectId: "shoe-shop-1fc86",
+  storageBucket: "shoe-shop-1fc86.firebasestorage.app",
+  messagingSenderId: "758147705832",
+  appId: "1:758147705832:web:b2dcffe9e66d2f0045925d",
+  measurementId: "G-4MKWMMPFY7"
 };
 
-// Khởi tạo Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
-const facebookProvider = new FacebookAuthProvider();
 
-export { auth, googleProvider, facebookProvider };
+export { auth, googleProvider };

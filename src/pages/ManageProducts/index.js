@@ -95,12 +95,6 @@ function ManageProducts() {
     try {
       const values = form.getFieldsValue();
 
-      // Cập nhật stock cho size được chọn
-      const updatedSizes = editingProduct.size.map((item, index) => ({
-        ...item,
-        stock: index === values.selectedSize ? values.stock : item.stock,
-      }));
-
       const updatedProduct = {
         productId: editingProduct.id,
         name: values.name,
@@ -112,8 +106,9 @@ function ManageProducts() {
         addSizeRequest: {
           size: editingProduct.size[values.selectedSize].size,
           quantity: values.stock
-        }, // Cập nhật danh sách size
+        },
       };
+
       await fetch(`/product/admin/update`, {
         method: "POST",
         headers: { 
@@ -123,8 +118,33 @@ function ManageProducts() {
         body: JSON.stringify(updatedProduct),
       });
 
+      // Nếu có thêm size mới
+      if (values.newSize && values.newSizeStock !== undefined) {
+        const newSizeProduct = {
+          productId: editingProduct.id,
+          name: values.name,
+          urlImage: values.image,
+          description: values.description,
+          brandName: values.brand,
+          categoryName: values.category,
+          price: values.price,
+          addSizeRequest: {
+            size: values.newSize,
+            quantity: values.newSizeStock
+          },
+        };
+        await fetch(`/product/admin/update`, {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${sessionStorage.getItem("token")}`,
+          },
+          body: JSON.stringify(newSizeProduct),
+        });
+      }
+
       message.success("Cập nhật sản phẩm thành công!");
-      await getProducts(); // Load lại danh sách sản phẩm
+      await getProducts();
       setIsEditModalVisible(false);
     } catch (error) {
       message.error("Có lỗi xảy ra khi cập nhật sản phẩm!");
@@ -422,7 +442,7 @@ function ManageProducts() {
             </Form.Item>
             <Form.Item
               name="selectedSize"
-              label="Size"
+              label="Cập nhật số lượng cho size có sẵn"
               rules={[{ required: true, message: "Vui lòng chọn size!" }]}
             >
               <Select
@@ -442,6 +462,20 @@ function ManageProducts() {
               rules={[{ required: true, message: "Vui lòng nhập số lượng!" }]}
             >
               <InputNumber style={{ width: "100%" }} min={0} />
+            </Form.Item>
+            <Form.Item label="Thêm size mới (tùy chọn)">
+              <Row gutter={10}>
+                <Col span={12}>
+                  <Form.Item name="newSize" noStyle>
+                    <InputNumber placeholder="Size mới (VD: 42)" style={{ width: "100%" }} min={1} />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item name="newSizeStock" noStyle>
+                    <InputNumber placeholder="Số lượng" style={{ width: "100%" }} min={0} />
+                  </Form.Item>
+                </Col>
+              </Row>
             </Form.Item>
           </Form>
         </Modal>
