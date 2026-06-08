@@ -130,8 +130,20 @@ const ManageVouchers = () => {
               <Option value="AMOUNT">Số tiền cố định (đ)</Option>
             </Select>
           </Form.Item>
-          <Form.Item name="discountValue" label="Giá trị giảm" rules={[{ required: true, message: "Nhập giá trị!" }]}>
-            <InputNumber style={{ width: "100%" }} min={1} placeholder="VD: 10 (%) hoặc 50000 (đ)" />
+          <Form.Item name="discountValue" label="Giá trị giảm" rules={[
+            { required: true, message: "Nhập giá trị!" },
+            { type: 'number', min: 1, message: "Giá trị phải lớn hơn 0!" },
+            ({ getFieldValue }) => ({
+              validator(_, value) {
+                const type = getFieldValue('discountType');
+                if (type === 'PERCENT' && value > 100) {
+                  return Promise.reject('Giảm theo % phải từ 1 đến 100!');
+                }
+                return Promise.resolve();
+              }
+            })
+          ]}>
+            <InputNumber style={{ width: "100%" }} min={1} max={form.getFieldValue('discountType') === 'PERCENT' ? 100 : undefined} placeholder="VD: 10 (%) hoặc 50000 (đ)" />
           </Form.Item>
           <Form.Item name="maxDiscount" label="Giảm tối đa (đ) - chỉ áp dụng cho loại %">
             <InputNumber style={{ width: "100%" }} min={0} placeholder="Để trống = không giới hạn" />

@@ -55,11 +55,19 @@ function LayoutDefault() {
         params: { message: currentInput },
       });
 
-      const botResponse = response.data.data;
-      setChatMessages(prevMessages => [...prevMessages, { sender: 'bot', text: botResponse }]);
+      const data = response.data.data;
+      // Handle both old (string) and new (object) response format
+      const botText = typeof data === 'string' ? data : data?.text;
+      const products = typeof data === 'object' ? (data?.products || []) : [];
+
+      setChatMessages(prevMessages => [...prevMessages, {
+        sender: 'bot',
+        text: botText,
+        products: products
+      }]);
     } catch (error) {
       console.error('Error calling chatbot API:', error);
-      setChatMessages(prevMessages => [...prevMessages, { sender: 'bot', text: 'Có lỗi xảy ra, vui lòng thử lại sau!' }]);
+      setChatMessages(prevMessages => [...prevMessages, { sender: 'bot', text: 'Có lỗi xảy ra, vui lòng thử lại sau!', products: [] }]);
     }
   };
 
@@ -67,7 +75,7 @@ function LayoutDefault() {
     <Layout>
       <Header className='header'>
         <div className='header__logo animate__animated animate__lightSpeedInRight'>
-          <NavLink to='/'>Logo</NavLink>
+          <NavLink to='/'>AT Shop</NavLink>
         </div>
         <div className='header__menu animate__animated animate__fadeInDown'>
           <NavLink to='/'>Trang chủ</NavLink>
@@ -162,6 +170,24 @@ function LayoutDefault() {
               {chatMessages.map((msg, index) => (
                 <div key={index} className={`chatbot-message ${msg.sender}`}>
                   <span>{msg.text}</span>
+                  {msg.sender === 'bot' && msg.products && msg.products.length > 0 && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
+                      {msg.products.map(p => (
+                        <div key={p.id} style={{
+                          background: '#fff', borderRadius: 8, padding: '6px 10px',
+                          display: 'flex', alignItems: 'center', gap: 10,
+                          boxShadow: '0 1px 4px rgba(0,0,0,0.1)'
+                        }}>
+                          <img src={p.image} alt={p.name} style={{ width: 55, height: 55, objectFit: 'cover', borderRadius: 6, flexShrink: 0 }} />
+                          <div>
+                            <p style={{ fontSize: 12, margin: 0, fontWeight: 'bold', color: '#333' }}>{p.name}</p>
+                            <p style={{ fontSize: 11, color: '#888', margin: '2px 0 0' }}>{p.brand}</p>
+                            <p style={{ fontSize: 12, color: '#e74c3c', margin: 0, fontWeight: 'bold' }}>{p.price?.toLocaleString()}đ</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
